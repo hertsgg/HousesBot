@@ -77,7 +77,7 @@ bot.on("message", async message => {
          stefcykaScore= message.guild.roles.get(config.stefcykaID);
          ssbScore = message.guild.roles.get(config.ssbID);
          slytherinScore = message.guild.roles.get(config.slytherinID); 
-         message.channel.send(`\n **Slytherin**: *${slytherinScore.name}* \n**Team StefCyka**: *${stefcykaScore.name}* \n**House Dannister** ${dannisterScore.name} \n**SSB Clan** ${ssbScore.name}`);
+         message.channel.send(`\n **Slytherin**: *${slytherinScore.name}* \n**Team StefCyka**: *${stefcykaScore.name}* \n**House Dannister** *${dannisterScore.name}* \n**SSB Clan** *${ssbScore.name}*`);
          break;
    }
    });
