@@ -14,7 +14,7 @@ can find instructions on how to do this here: https://www.digitaltrends.com/gami
 Once you have set up your auth.json file with your bots' token, navigate 
 to the cloned directory and complete the following actions.
 
-`npm install`
+`npm install`\n
 `node bot.js`
 
 Now if you have correctly installed everything then your bot should be up and running on the server you selected.
