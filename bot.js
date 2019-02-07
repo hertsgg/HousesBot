@@ -4,7 +4,7 @@ const Discord = require("discord.js");
 
 const bot = new Discord.Client();
 const logger = require('winston');
-const auth = require("./auth.json");
+const config = require("./config.json");
 
 // Configure logger settings
 logger.remove(logger.transports.Console);
@@ -28,10 +28,10 @@ bot.on("message", async message => {
    if(message.author.bot) return;
    
 
-   if(message.content.indexOf(auth.prefix) !== 0) return;
+   if(message.content.indexOf(config.prefix) !== 0) return;
    
 
-   const args = message.content.slice(auth.prefix.length).trim().split(/ +/g);
+   const args = message.content.slice(config.prefix.length).trim().split(/ +/g);
    const command = args.shift().toLowerCase();
    
    switch (command) {
@@ -51,19 +51,19 @@ bot.on("message", async message => {
          let scoreInt = 0;
          let scoreString = ''; 
          if (house.toUpperCase() === "SLYTHERIN" ) {
-            scoreString = message.guild.roles.get('543100193495580692'); //Insert specific Role ID here. This can be done by doing \@ROLENAME 
+            scoreString = message.guild.roles.get(config.slytherinID);
             scoreInt = parseInt(scoreString.name);
          }
          else if (house.toUpperCase() === "SSB" ) {
-            scoreString = message.guild.roles.get('543108302611939328'); //Insert specific Role ID here. This can be done by doing \@ROLENAME 
+            scoreString = message.guild.roles.get(config.ssbID);
             scoreInt = parseInt(scoreString.name);
          }
          else if (house.toUpperCase() === "STEFCYKA" ) {
-            scoreString = message.guild.roles.get('543108072051179550'); //Insert specific Role ID here. This can be done by doing \@ROLENAME 
+            scoreString = message.guild.roles.get(config.stefcykaID); 
             scoreInt = parseInt(scoreString.name);
          }
          else if (house.toUpperCase() === "DANNISTER" ) {
-            scoreString = message.guild.roles.get('543108655034269706'); //Insert specific Role ID here. This can be done by doing \@ROLENAME 
+            scoreString = message.guild.roles.get(config.dannisterID); 
             scoreInt = parseInt(scoreString.name);
          }
          else {
@@ -77,9 +77,16 @@ bot.on("message", async message => {
          scoreString.edit({name: newScore});
          message.reply(`added score to ${house}. New score: ${newScoreInt} Old score: ${scoreString.name}`);
          break;
+      case "leaderboard":
+         dannisterScore = message.guild.roles.get(config.dannisterID); 
+         stefcykaScore= message.guild.roles.get(config.stefcykaID);
+         ssbScore = message.guild.roles.get(config.ssbID);
+         slytherinScore = message.guild.roles.get(config.slytherinID); 
+         message.channel.send(`\n **Slytherin**: *${slytherinScore.name}* \n**Team StefCyka**: *${stefcykaScore.name}* \n**House Dannister** ${dannisterScore.name} \n**SSB Clan** ${ssbScore.name}`);
+         break;
    }
 
    });
 
-bot.login(auth.token);
+bot.login(config.token);
 
