@@ -10,8 +10,8 @@ to check how many points their house has.
 
 After cloning the repository into your own directory, you'll need to make 
 sure you have installed node.js and have set up a discord bot online. You 
-can find instructions on how to do this here: https://www.digitaltrends.com/gaming/how-to-make-a-discord-bot/
-Once you have set up your auth.json file with your bots' token, navigate 
+can find instructions on how to do this online.Once you have set up your 
+config.json file with your bots' token and the correct role ids, navigate 
 to the cloned directory and complete the following actions.
 
 `npm install` then 
