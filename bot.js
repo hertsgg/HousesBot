@@ -97,7 +97,7 @@ bot.on("message", async message => {
                 message.reply(`Sorry you don't have permission to verify members`);
                 break;
             }
-   }
+        }
    });
 
 bot.login(config.token);
