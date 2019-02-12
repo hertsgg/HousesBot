@@ -31,6 +31,7 @@ bot.on("message", async message => {
             const m = await message.channel.send("Ping?");
             m.edit(`Pong! Latency is ${m.createdTimestamp - message.createdTimestamp}ms. API Latency is ${Math.round(bot.ping)}ms`);
             break;
+            
         // Add scores to houses
         case "add":
             // ensure committee are the only people to add scores to houses
@@ -71,16 +72,25 @@ bot.on("message", async message => {
             message.reply(`Sorry you don't have permission to add scores to houses`);
             break;
             }
+
         // Leaderboard command to see where each house stands
         case "leaderboard":
             dannisterScore = message.guild.roles.get(config.dannisterID); 
             stefcykaScore= message.guild.roles.get(config.stefcykaID);
             ssbScore = message.guild.roles.get(config.ssbID);
             slytherinScore = message.guild.roles.get(config.slytherinID); 
-            message.channel.send(`\n **Slytherin**: *${slytherinScore.name}* \n**Team StefCyka**: *${stefcykaScore.name}* \n**House Dannister** ${dannisterScore.name} \n**SSB Clan** ${ssbScore.name}`);
+            message.channel.send(`\n **Slytherin**: *${slytherinScore.name}* \n**Team StefCyka**: *${stefcykaScore.name}* \n**House Dannister** *${dannisterScore.name}* \n**SSB Clan** *${ssbScore.name}*`);
             break;
-        // Verify members
+
+        // Verify members/Assign them their house
         case "verify":
+            let arg = args[1];
+            let slytherinID = message.guild.roles.find(role => role.name === "Slytherin");
+            let stefcykaID = message.guild.roles.find(role => role.name === "Team StefCyka");
+            let ssbID = message.guild.roles.find(role => role.name === "SSB Clan");
+            let dannisterID = message.guild.roles.find(role => role.name === "House Dannister");
+            let sortingChoice = Math.floor(Math.random()*(4-1+1)+1);
+            let sortingHat = [0,slytherinID,stefcykaID,ssbID,dannisterID];
             if (message.member.roles.has(config.committeeID)) {
                 let mem = message.mentions.members.first();
                 let verifiedRole = message.guild.roles.find(role => role.name === "✔️ Verified Member");
@@ -89,7 +99,12 @@ bot.on("message", async message => {
                 }
                 else {
                     mem.addRole(verifiedRole.id).catch(console.error);
-                    message.channel.send(`Congratulations ${mem}! You're now verified!`);
+                    if (arg === "nohouse") {
+                        message.channel.send(`Congratulations ${mem}! You're now verified!`);
+                        break;
+                    }
+                    mem.addRole(sortingHat[sortingChoice]);
+                    message.channel.send(`Congratulations ${mem}! You're now verified! The sorting hat has selected ${sortingHat[sortingChoice]} as your new house!`);
                 }
                 break;
             }
@@ -97,7 +112,74 @@ bot.on("message", async message => {
                 message.reply(`Sorry you don't have permission to verify members`);
                 break;
             }
-        }
+        
+        // Quickly remove all members of houses or verified members
+        case "purge":
+            if (message.member.roles.has(config.committeeID)) {
+                let type = args[0];
+                let count=0;
+                const list = bot.guilds.get(config.serverID);
+                switch (type) {
+                    case "verified":
+                        let verifiedRole = message.guild.roles.find(role => role.name === "✔️ Verified Member");
+                        list.members.forEach(member => {
+                            member.removeRole(verifiedRole);
+                        });
+                        break;
+                    case "houses":
+                        let slytherinID = message.guild.roles.find(role => role.name === "Slytherin");
+                        let stefcykaID = message.guild.roles.find(role => role.name === "Team StefCyka");
+                        let ssbID = message.guild.roles.find(role => role.name === "SSB Clan");
+                        let dannisterID = message.guild.roles.find(role => role.name === "House Dannister");
+                        list.members.forEach(member => {
+                            if (member.roles.has(slytherinID.id)) member.removeRole(slytherinID)
+                            else if (member.roles.has(stefcykaID.id)) member.removeRole(stefcykaID)
+                            else if (member.roles.has(ssbID.id)) member.removeRole(ssbID)
+                            else if (member.roles.has(dannisterID.id)) member.removeRole(dannisterID)
+                        });
+                        message.reply("All house members roles' removed");
+                        break;
+                    default:
+                        message.reply("You can only purge the following types: `houses` or `verified`");
+                        break;
+                };
+                break;
+            }
+            else {
+                message.reply(`Sorry you don't have permission to purge members' roles `);
+                break;
+            }
+
+        // Shuffle houses
+        case "shuffle":
+            if (message.member.roles.has(config.committeeID)) {
+                let verifiedRole = message.guild.roles.find(role => role.name === "✔️ Verified Member");
+                let slytherinID = message.guild.roles.find(role => role.name === "Slytherin");
+                let stefcykaID = message.guild.roles.find(role => role.name === "Team StefCyka");
+                let ssbID = message.guild.roles.find(role => role.name === "SSB Clan");
+                let dannisterID = message.guild.roles.find(role => role.name === "House Dannister");
+                const list = bot.guilds.get(config.serverID);
+                list.members.forEach(member => {
+                    console.log(member.user.username);
+                    if (member.roles.has(slytherinID.id)) member.removeRole(slytherinID)
+                    else if (member.roles.has(stefcykaID.id)) member.removeRole(stefcykaID)
+                    else if (member.roles.has(ssbID.id)) member.removeRole(ssbID)
+                    else if (member.roles.has(dannisterID.id)) member.removeRole(dannisterID)
+                    setTimeout(function()
+                    {
+                        let sortingChoice = Math.floor(Math.random()*(4-1+1)+1);
+                        let sortingHat = [0,slytherinID,stefcykaID,ssbID,dannisterID];
+                        member.addRole(sortingHat[sortingChoice]);
+                    }, 5000);
+
+                });
+                break;
+            }
+            else {
+                message.reply(`Sorry you don't have permission to shuffle members`);
+                break;
+            }
+    }
    });
 
 bot.login(config.token);
