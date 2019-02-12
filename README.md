@@ -10,7 +10,7 @@ to check how many points their house has.
 
 ### Current implemented commands (12/02/19)
 
-`!verify @NAME [nohouse]` to verify members (use the argument `nohouse` if you specifically don't want this member to be set a house <br />
+`!verify @NAME [nohouse]` to verify members (use the argument `nohouse` if you specifically don't want this member to be set a house) <br />
 `!add HOUSE SCORETOBEADDED` to add points to a house <br />
 `!leaderboard` to check the leaderboard of the houses <br />
 `!ping` to check server latency to the bot <br />
