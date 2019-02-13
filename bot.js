@@ -169,6 +169,7 @@ bot.on("message", async message => {
             if (message.member.roles.has(config.committeeID)) {
                 let confirm = args[0];
                 if (confirm === "confirm") {
+                    let count = 0;
                     const m = await message.channel.send("Sorting...");
                     let slytherinID = message.guild.roles.find(role => role.name === "Slytherin");
                     let stefcykaID = message.guild.roles.find(role => role.name === "Team StefCyka");
@@ -176,19 +177,22 @@ bot.on("message", async message => {
                     let dannisterID = message.guild.roles.find(role => role.name === "House Dannister");
                     const list = bot.guilds.get(config.serverID);
                     list.members.forEach(member => {
-                        if (member.roles.has(slytherinID.id)) member.removeRole(slytherinID)
-                        else if (member.roles.has(stefcykaID.id)) member.removeRole(stefcykaID)
-                        else if (member.roles.has(ssbID.id)) member.removeRole(ssbID)
-                        else if (member.roles.has(dannisterID.id)) member.removeRole(dannisterID)
                         setTimeout(function()
-                        {
-                            let sortingChoice = Math.floor(Math.random()*(4-1+1)+1);
-                            let sortingHat = [0,slytherinID,stefcykaID,ssbID,dannisterID];
-                            member.addRole(sortingHat[sortingChoice]);
-                            m.edit(`${message.author} All houses successfully shuffled randomly between members`);
-                        }, 5000);
+                        {   
+                            if (member.roles.has(slytherinID.id)) member.removeRole(slytherinID)
+                            else if (member.roles.has(stefcykaID.id)) member.removeRole(stefcykaID)
+                            else if (member.roles.has(ssbID.id)) member.removeRole(ssbID)
+                            else if (member.roles.has(dannisterID.id)) member.removeRole(dannisterID)
+                            setTimeout(function()
+                            {
+                                let sortingChoice = Math.floor(Math.random()*(4-1+1)+1);
+                                let sortingHat = [0,slytherinID,stefcykaID,ssbID,dannisterID];
+                                member.addRole(sortingHat[sortingChoice]);
+                                count++;
+                                m.edit(`${message.author} Members Shuffled: ${count}`);
+                            }, 5000);
+                        }, 1000);
                     });
-                    
                     break;
                 }
                 else {
