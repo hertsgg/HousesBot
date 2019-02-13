@@ -1,7 +1,7 @@
 const Discord = require("discord.js");
 
 // Initialize Discord Bot
-const bot = new Discord.Client();
+const bot = new Discord.Client({forceFetchUsers: true});
 const logger = require('winston');
 const config = require("./config.json");
 
@@ -15,13 +15,16 @@ logger.level = 'debug';
 //Initial setup
 bot.on("ready", () => {
    logger.info('Connected');
-   console.log(`Bot has started: Users: ${bot.users.size}; Channels: ${bot.channels.size}; Servers: ${bot.guilds.size}`); 
+   const list = bot.guilds.get(config.serverID);
+   console.log(`Bot has started: Users: ${list.members.size} ${list.memberCount}; Channels: ${bot.channels.size}; Servers: ${bot.guilds.size}`); 
 });
 
 //Chat commands, message replies
 bot.on("message", async message => {
    if(message.content.indexOf(config.prefix) !== 0) return;
-   
+   const list = bot.guilds.get(config.serverID);
+   await list.fetchMembers();
+   console.log(`${list.members.size}`);
    const args = message.content.slice(config.prefix.length).trim().split(/ +/g);
    const command = args.shift().toLowerCase();
    
@@ -118,8 +121,7 @@ bot.on("message", async message => {
             if (message.member.roles.has(config.committeeID)) {
                 let type = args[0];
                 let confirm = args[1];
-                let count=0;
-                const list = bot.guilds.get(config.serverID);
+                let count = 0;
                 switch (type) {
                     case "verified":
                         if (confirm === "confirm") {
@@ -168,32 +170,33 @@ bot.on("message", async message => {
         case "shuffle":
             if (message.member.roles.has(config.committeeID)) {
                 let confirm = args[0];
+                const msg = await message.channel.send("Checking "+list.members.size+" users...");
                 if (confirm === "confirm") {
                     let count = 1;
                     let count1 = 0;
-                    let count2 = 0;
-                    const m = await message.channel.send("Sorting...");
+                    const m = await message.channel.send("Sorting verified members...");
+                    let verifiedRole = message.guild.roles.find(role => role.name === "✔️ Verified Member");
                     let slytherinID = message.guild.roles.find(role => role.name === "Slytherin");
                     let stefcykaID = message.guild.roles.find(role => role.name === "Team StefCyka");
                     let ssbID = message.guild.roles.find(role => role.name === "SSB Clan");
                     let dannisterID = message.guild.roles.find(role => role.name === "House Dannister");
-                    const list = bot.guilds.get(config.serverID);
                     list.members.forEach(member => {
-
-                        if (member.roles.has(slytherinID.id)) member.removeRole(slytherinID)
-                        else if (member.roles.has(stefcykaID.id)) member.removeRole(stefcykaID)
-                        else if (member.roles.has(ssbID.id)) member.removeRole(ssbID)
-                        else if (member.roles.has(dannisterID.id)) member.removeRole(dannisterID)
-                        count1++;
-                        m.edit(`${message.author} Roles removed: ${count1} Members Shuffled: ${count-1}`);
-                        setTimeout(function(){
-                            let sortingChoice = Math.floor(Math.random()*(4-1+1)+1);
-                            let sortingHat = [0,slytherinID,stefcykaID,ssbID,dannisterID];
-                            add(member,sortingHat[sortingChoice])
+                        if (member.roles.has(verifiedRole.id)) {
+                            if (member.roles.has(slytherinID.id)) member.removeRole(slytherinID)
+                            else if (member.roles.has(stefcykaID.id)) member.removeRole(stefcykaID)
+                            else if (member.roles.has(ssbID.id)) member.removeRole(ssbID)
+                            else if (member.roles.has(dannisterID.id)) member.removeRole(dannisterID)
+                            count1++;
                             m.edit(`${message.author} Roles removed: ${count1} Members Shuffled: ${count-1}`);
-                            count++;
-                            
-                        }, 5000);
+                            setTimeout(function(){
+                                let sortingChoice = Math.floor(Math.random()*(4-1+1)+1);
+                                let sortingHat = [0,slytherinID,stefcykaID,ssbID,dannisterID];
+                                add(member,sortingHat[sortingChoice])
+                                m.edit(`${message.author} Roles removed: ${count1} Members Shuffled: ${count-1}`);
+                                count++;
+                                
+                            }, 5000);
+                        }
                     });
                     break;
                 }
@@ -211,5 +214,7 @@ bot.on("message", async message => {
    async function add(member,choice) {
        await member.addRole(choice).catch(console.error);
    }
+
+
 bot.login(config.token);
 
