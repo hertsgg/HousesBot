@@ -8,12 +8,14 @@ to check how many points their house has.
 
 ## Using the bot on discord
 
-### Current implemented commands (07/02/19)
+### Current implemented commands (12/02/19)
 
-`!verify @NAME` to verify members <br />
+`!verify @NAME [nohouse]` to verify members (use the argument `nohouse` if you specifically don't want this member to be set a house) <br />
 `!add HOUSE SCORETOBEADDED` to add points to a house <br />
 `!leaderboard` to check the leaderboard of the houses <br />
 `!ping` to check server latency to the bot <br />
+`!purge [verified][houses]` to remove all verified members or all members of houses <br />
+`!shuffle` to shuffle all members into randomly assigned houses <br />
 
 ## Setting up config.json
 
