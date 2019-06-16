@@ -132,7 +132,7 @@ bot.on("message", async message => {
                             message.reply("All verified roles' removed");
                         }
                         else {
-                            message.reply(`Woah are you sure you want to do this? This will remove all verified members in the server. 
+                            message.reply(`Woah are you sure you want to do this? This will remove all the verified member roles in the server. 
                                            Type '!purge verified confirm' if you're sure!`);
                         }
                         break;
@@ -151,7 +151,7 @@ bot.on("message", async message => {
                             message.reply("All house members roles' removed");
                         }
                         else {
-                            message.reply(`Woah are you sure you want to do this? This will remove all members in houses on the server. 
+                            message.reply(`Woah are you sure you want to do this? This will remove all the houses roles on the server. 
                                            Type '!purge houses confirm' if you're sure!`);
                         }
                         break;
@@ -205,9 +205,32 @@ bot.on("message", async message => {
                 }
             }
             else {
-                message.reply(`Sorry you don't have permission to shuffle members`);
+                message.reply(`Sorry, you don't have permission to shuffle members`);
                 break;
             }
+        
+        case "alumni":
+            if (message.member.roles.has(config.committeeID)) {
+                let arg = args[1];
+                let alumniRole = message.guild.roles.find(role => role.name === "Society Alumni");
+                let mem = message.mentions.members.first();
+                if (mem.roles.has(alumniRole.id)) {
+                    message.channel.send(`${mem} is already an alumni student!`);
+                    break;
+                }
+                else {
+                    mem.addRole(alumniRole.id).catch(console.error);
+                    message.channel.send(`Congratulations ${mem}! You're now an official alumni student!`);
+                    break;
+                }
+            } else {
+                    message.channel.send(`Sorry, you don't have permission to add alumni students`);
+                    break;
+            }
+
+        default:
+            message.channel.send(`Sorry, I don't quite understand what you're asking. You can find more information about me here: \n\n https://github.com/hertsgg/HousesBot`);
+            
     }
    });
 
