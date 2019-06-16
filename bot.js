@@ -172,8 +172,8 @@ bot.on("message", async message => {
                 let confirm = args[0];
                 const msg = await message.channel.send("Checking "+list.members.size+" users...");
                 if (confirm === "confirm") {
-                    let count = 1;
-                    let count1 = 0;
+                    let membersShuffled = 1;
+                    let rolesRemoved = 0;
                     const m = await message.channel.send("Sorting verified members...");
                     let verifiedRole = message.guild.roles.find(role => role.name === "✔️ Verified Member");
                     let slytherinID = message.guild.roles.find(role => role.name === "Slytherin");
@@ -186,14 +186,14 @@ bot.on("message", async message => {
                             else if (member.roles.has(stefcykaID.id)) member.removeRole(stefcykaID)
                             else if (member.roles.has(ssbID.id)) member.removeRole(ssbID)
                             else if (member.roles.has(dannisterID.id)) member.removeRole(dannisterID)
-                            count1++;
-                            m.edit(`${message.author} Roles removed: ${count1} Members Shuffled: ${count-1}`);
+                            rolesRemoved++;
+                            m.edit(`${message.author} Roles removed: ${rolesRemoved} Members Shuffled: ${membersShuffled-1}`);
                             setTimeout(function(){
                                 let sortingChoice = Math.floor(Math.random()*(4-1+1)+1);
                                 let sortingHat = [0,slytherinID,stefcykaID,ssbID,dannisterID];
                                 add(member,sortingHat[sortingChoice])
-                                m.edit(`${message.author} Roles removed: ${count1} Members Shuffled: ${count-1}`);
-                                count++;
+                                m.edit(`${message.author} Roles removed: ${rolesRemoved} Members Shuffled: ${membersShuffled-1}`);
+                                membersShuffled++;
                                 
                             }, 5000);
                         }
