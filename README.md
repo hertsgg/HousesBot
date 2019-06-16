@@ -8,7 +8,7 @@ to check how many points their house has.
 
 ## Using the bot on discord
 
-### Current implemented commands (12/02/19)
+### Current implemented commands (16/06/19)
 
 `!verify @NAME [nohouse]` to verify members (use the argument `nohouse` if you specifically don't want this member to be set a house) <br />
 `!add HOUSE SCORETOBEADDED` to add points to a house <br />
