@@ -132,7 +132,7 @@ bot.on("message", async message => {
                             message.reply("All verified roles' removed");
                         }
                         else {
-                            message.reply(`Woah are you sure you want to do this? This will remove all verified members in the server. 
+                            message.reply(`Woah are you sure you want to do this? This will remove all the verified member roles in the server. 
                                            Type '!purge verified confirm' if you're sure!`);
                         }
                         break;
@@ -151,7 +151,7 @@ bot.on("message", async message => {
                             message.reply("All house members roles' removed");
                         }
                         else {
-                            message.reply(`Woah are you sure you want to do this? This will remove all members in houses on the server. 
+                            message.reply(`Woah are you sure you want to do this? This will remove all the houses roles on the server. 
                                            Type '!purge houses confirm' if you're sure!`);
                         }
                         break;
@@ -172,8 +172,8 @@ bot.on("message", async message => {
                 let confirm = args[0];
                 const msg = await message.channel.send("Checking "+list.members.size+" users...");
                 if (confirm === "confirm") {
-                    let count = 1;
-                    let count1 = 0;
+                    let membersShuffled = 1;
+                    let rolesRemoved = 0;
                     const m = await message.channel.send("Sorting verified members...");
                     let verifiedRole = message.guild.roles.find(role => role.name === "✔️ Verified Member");
                     let slytherinID = message.guild.roles.find(role => role.name === "Slytherin");
@@ -186,14 +186,14 @@ bot.on("message", async message => {
                             else if (member.roles.has(stefcykaID.id)) member.removeRole(stefcykaID)
                             else if (member.roles.has(ssbID.id)) member.removeRole(ssbID)
                             else if (member.roles.has(dannisterID.id)) member.removeRole(dannisterID)
-                            count1++;
-                            m.edit(`${message.author} Roles removed: ${count1} Members Shuffled: ${count-1}`);
+                            rolesRemoved++;
+                            m.edit(`${message.author} Roles removed: ${rolesRemoved} Members Shuffled: ${membersShuffled-1}`);
                             setTimeout(function(){
                                 let sortingChoice = Math.floor(Math.random()*(4-1+1)+1);
                                 let sortingHat = [0,slytherinID,stefcykaID,ssbID,dannisterID];
                                 add(member,sortingHat[sortingChoice])
-                                m.edit(`${message.author} Roles removed: ${count1} Members Shuffled: ${count-1}`);
-                                count++;
+                                m.edit(`${message.author} Roles removed: ${rolesRemoved} Members Shuffled: ${membersShuffled-1}`);
+                                membersShuffled++;
                                 
                             }, 5000);
                         }
@@ -205,9 +205,32 @@ bot.on("message", async message => {
                 }
             }
             else {
-                message.reply(`Sorry you don't have permission to shuffle members`);
+                message.reply(`Sorry, you don't have permission to shuffle members`);
                 break;
             }
+        
+        case "alumni":
+            if (message.member.roles.has(config.committeeID)) {
+                let arg = args[1];
+                let alumniRole = message.guild.roles.find(role => role.name === "Society Alumni");
+                let mem = message.mentions.members.first();
+                if (mem.roles.has(alumniRole.id)) {
+                    message.channel.send(`${mem} is already an alumni student!`);
+                    break;
+                }
+                else {
+                    mem.addRole(alumniRole.id).catch(console.error);
+                    message.channel.send(`Congratulations ${mem}! You're now an official alumni student!`);
+                    break;
+                }
+            } else {
+                    message.channel.send(`Sorry, you don't have permission to add alumni students`);
+                    break;
+            }
+
+        default:
+            message.channel.send(`Sorry, I don't quite understand what you're asking. You can find more information about me here: \n\n https://github.com/hertsgg/HousesBot`);
+            
     }
    });
 
