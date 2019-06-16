@@ -16,6 +16,7 @@ to check how many points their house has.
 `!ping` to check server latency to the bot <br />
 `!purge [verified][houses]` to remove all verified members or all members of houses <br />
 `!shuffle` to shuffle all members into randomly assigned houses <br />
+`!alumni @NAME` to give a member the Society Alumni role <br />
 
 ## Setting up config.json
 
