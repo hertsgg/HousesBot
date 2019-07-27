@@ -6,5 +6,8 @@
    "ssbID": "",
    "dannisterID": "",
    "committeeID": "",
-   "serverID": ""
+   "serverID": "",
+   "mongoAddress": "",
+   "streamDiscord": "",
+   "twitchClientId": ""
 }

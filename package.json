@@ -9,6 +9,7 @@
       "discord.js": "^11.4.2",
       "moment": "^2.24.0",
       "mongodb": "^3.3.0-beta2",
+      "twitch-api-v5": "^2.0.4",
       "winston": "^3.2.1"
    }
 }

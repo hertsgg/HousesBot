@@ -6,8 +6,12 @@ const logger = require('winston');
 const config = require("./config.json");
 const moment = require('moment');
 
-const MongoClient = require('mongodb').MongoClient;
+//Connect to Twitch Client
+var twitch = require('twitch-api-v5');
+twitch.clientID = config.twitchClientId;
 
+//Establish connection to MongoDB
+const MongoClient = require('mongodb').MongoClient;
 MongoClient.connect(config.mongoAddress, {useNewUrlParser: true}, (err, client) => {
     if (err) {
         console.error(err);
@@ -32,27 +36,15 @@ bot.on("ready", () => {
    console.log(`Bot has started: Users: ${list.members.size} ${list.memberCount}; Channels: ${bot.channels.size}; Servers: ${bot.guilds.size}`); 
 });
 
-//When a message is deleted check this
-bot.on("messageDelete", async messageDelete => {
-    if (messageDelete.author.id === config.nowLiveID) {
-        handleStreamerEnd(messageDelete);
-    }
-});
-
 //Chat commands, message replies
 bot.on("message", async message => {
-    if (message.author.id === config.nowLiveID) {
-        handleStreamerStart(message);
-    }
-   if(message.content.indexOf(config.prefix) !== 0) return;
+   if (message.content.indexOf(config.prefix) !== 0) return;
    const list = bot.guilds.get(config.serverID);
    await list.fetchMembers();
    console.log(`${list.members.size}`);
    const args = message.content.slice(config.prefix.length).trim().split(/ +/g);
    const command = args.shift().toLowerCase();
 
-
-   
    switch (command) {
         // Generic PING command
         case "ping":
@@ -273,59 +265,11 @@ bot.on("message", async message => {
 
    });
 
-    async function add(member,choice) {
-       await member.addRole(choice).catch(console.error);
-    }
+async function add(member,choice) {
+    await member.addRole(choice).catch(console.error);
+}
 
-    function handleStreamerEnd(message) {
-        MongoClient.connect(config.mongoAddress, {useNewUrlParser: true}, (err, client) => {
-            if (err) {
-                console.error(err);
-                return;
-            }
-            const db = client.db("hertsgg");
-            const collection = db.collection("twitch-stats");
-            collection.find().toArray((err, items) => {
-                items.forEach(item => {
-                    if (message.content.includes(item.twitchId)) {
-                        collection.updateOne({twitchId: item.twitchId}, {'$set': {'recentStreamEnd': moment().format()}});
-                        var durationOfStream = moment.duration(moment(moment().format()).diff(moment(item.recentStreamStart))).asHours();
-                        var newStreak = item.streamStreakTime + durationOfStream;
-                        var newAllTime = item.streamAllTime + durationOfStream;
-                        collection.updateMany({twitchId: item.twitchId}, {'$set': {'streamStreakTime': newStreak, 'streamAllTime': newAllTime}});
-                        console.log(item.twitchId + ' has finished streaming');
-                    }
-                });
-            });
-        });
-    }
-
-    function handleStreamerStart(message) {
-        MongoClient.connect(config.mongoAddress, {useNewUrlParser: true}, (err, client) => {
-            if (err) {
-                console.error(err);
-                return;
-            }
-            const db = client.db("hertsgg");
-            const collection = db.collection("twitch-stats");
-            collection.find().toArray((err, items) => {
-                items.forEach(item => {
-                    if (message.content.includes(item.twitchId)) {
-                        collection.updateOne({twitchId: item.twitchId}, {'$set': {'recentStreamStart': moment().format()}});
-                        if (item.recentStreamEnd !== null) {
-                            var timeSinceLastStream = moment.duration(moment(moment().format()).diff(moment(item.recentStreamEnd))).asDays();
-                            if (timeSinceLastStream >= 28) {
-                                collection.updateOne({twitchId: item.twitchId}, {'$set': {'streamStreakTime': 0}});
-                            }
-                        }
-                        console.log(item.twitchId + ' has started streaming');
-                    }
-                });
-            });
-        });
-    }
-
- async function addNewStreamer(member, twitch, m) {
+async function addNewStreamer(member, twitchID, m) {
     await MongoClient.connect(config.mongoAddress, {useNewUrlParser: true}, (err, client) => {
         if (err) {
             console.error(err);
@@ -341,11 +285,23 @@ bot.on("message", async message => {
                 }
             });
             if (!exists) {
-                collection.insertOne({userId: member.id, twitchId: twitch, streamStreakTime: 0, streamAllTime: 0, recentStreamStart: null, recentStreamEnd: null}, (err, res) => {
-                    if (err) {
+                twitch.users.usersByName({ users: twitchID }, (err, res) => {
+                    if(err) {
+                        console.log(err);
                         m.edit(`This user already exists in our database or there has been some sort of error.`);
                     } else {
-                        m.edit(`Welcome ${member} to the herts.gg stream team! We will track your streaming hours for your twitch rewards for you :)`);
+                        console.log(res);
+                        if (res.users.length === 1) {
+                            collection.insertOne({userId: member.id, twitchId: twitchID, twitchChannelId: res.users[0]._id, streamingNow: false, streamStreakTime: 0, streamAllTime: 0, recentStreamStart: null, recentStreamEnd: null}, (err, res) => {
+                                if (err) {
+                                    m.edit(`This user already exists in our database or there has been some sort of error.`);
+                                } else {
+                                    m.edit(`Welcome ${member} to the herts.gg stream team! We will track your streaming hours for your twitch rewards for you :)`);
+                                }
+                            });
+                        } else {
+                            m.edit(`We couldn't find ${twitchID} in the twitch database. Make sure it is spelt correctly.`);
+                        }
                     }
                 });
             } else {
@@ -355,5 +311,45 @@ bot.on("message", async message => {
     });
 }
 
-bot.login(config.token);
+async function pollLive() {
+    var interval = setInterval (async function () {
+        await MongoClient.connect(config.mongoAddress, {useNewUrlParser: true}, (err, client) => {
+            if (err) {
+                console.error(err);
+                return;
+            }
+            const db = client.db("hertsgg");
+            const collection = db.collection("twitch-stats");
+            collection.find().toArray((err, items) => {
+                items.forEach(item => {
+                    twitch.streams.channel({ channelID: item.twitchChannelId }, async (err, res) => {
+                        if(err) {
+                            console.log(err);
+                        } else {
+                            console.log(res);
+                            if (res.stream !== null && item.streamingNow === false) {
+                                let message = await bot.channels.get(config.streamDiscord).send(item.twitchId + ' has gone live!');
+                                if (item.recentStreamEnd !== null) {
+                                    var timeSinceLastStream = moment.duration(moment(moment().format()).diff(moment(item.recentStreamEnd))).asDays();
+                                    if (timeSinceLastStream >= 28) {
+                                        collection.updateOne({twitchId: item.twitchId}, {'$set': {'streamStreakTime': 0}});
+                                    }
+                                }
+                                collection.updateMany({twitchId: item.twitchId}, {'$set': {'streamingNow': true, 'recentStreamStart': moment().format(), 'streamMessage': message.id}});
+                            } else if (res.stream === null && item.streamingNow === true) {
+                                var durationOfStream = moment.duration(moment(moment().format()).diff(moment(item.recentStreamStart))).asHours();
+                                var newStreak = item.streamStreakTime + durationOfStream;
+                                var newAllTime = item.streamAllTime + durationOfStream;
+                                await bot.channels.get(config.streamDiscord).fetchMessage(item.streamMessage).then(message => message.delete());
+                                collection.updateMany({twitchId: item.twitchId}, {'$set': {'streamingNow': false, 'streamMessage': null, 'recentStreamEnd': moment().format(), 'streamStreakTime': newStreak, 'streamAllTime': newAllTime}});
+                            }
+                        }
+                    });
+                });
+            });
+        });
+    }, 1 * 60000);
+}
 
+bot.login(config.token);
+pollLive();
