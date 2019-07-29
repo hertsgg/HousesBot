@@ -8,7 +8,7 @@ to check how many points their house has.
 
 ## Using the bot on discord
 
-### Current implemented commands (16/06/19)
+### Current implemented commands (29/07/19)
 
 `!verify @NAME [nohouse]` to verify members (use the argument `nohouse` if you specifically don't want this member to be set a house) <br />
 `!add HOUSE SCORETOBEADDED` to add points to a house <br />
@@ -17,6 +17,7 @@ to check how many points their house has.
 `!purge [verified][houses]` to remove all verified members or all members of houses <br />
 `!shuffle` to shuffle all members into randomly assigned houses <br />
 `!alumni @NAME` to give a member the Society Alumni role <br />
+`!addstreamer @NAME @TWITCHID` to add a streamer to our database to be tracked for stats <br />
 
 ## Setting up config.json
 
