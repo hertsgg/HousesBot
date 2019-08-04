@@ -2,7 +2,6 @@ const Discord = require("discord.js");
 
 // Initialize Discord Bot
 const bot = new Discord.Client({forceFetchUsers: true});
-const logger = require('winston');
 const config = require("./config.json");
 const moment = require('moment');
 
@@ -21,17 +20,8 @@ MongoClient.connect(config.mongoAddress, {useNewUrlParser: true}, (err, client) 
     const collection = db.collection("twitch-stats");
 });
 
-
-// Configure logger settings
-logger.remove(logger.transports.Console);
-logger.add(new logger.transports.Console, {
-    colorize: true
-});
-logger.level = 'debug';
-
 //Initial setup
 bot.on("ready", () => {
-   logger.info('Connected');
    const list = bot.guilds.get(config.serverID);
    console.log(`Bot has started: Users: ${list.members.size} ${list.memberCount}; Channels: ${bot.channels.size}; Servers: ${bot.guilds.size}`); 
 });
@@ -310,6 +300,10 @@ async function addNewStreamer(member, twitchID, m) {
     });
 }
 
+/* 
+* This method is used to check the status of our twitch streamers once every minute, this method is also used
+* for connecting to our MongoDB database to track our streamer statistics.
+*/
 async function pollLive() {
     var interval = setInterval (async function () {
         await MongoClient.connect(config.mongoAddress, {useNewUrlParser: true}, (err, client) => {
