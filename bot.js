@@ -18,7 +18,9 @@ MongoClient.connect(config.mongoAddress, {useNewUrlParser: true}, (err, client) 
     }
     const db = client.db("hertsgg");
     const collection = db.collection("twitch-stats");
+    client.close();
 });
+
 
 //Initial setup
 bot.on("ready", () => {
@@ -296,6 +298,7 @@ async function addNewStreamer(member, twitchID, m) {
             } else {
                 m.edit(`This user already exists in our database or there has been some sort of error.`);
             }
+            client.close();
         });
     });
 }
@@ -385,6 +388,7 @@ async function pollLive() {
                     });
                 });
             });
+            client.close();
         });
     }, 1 * 60000);
 }
