@@ -367,7 +367,7 @@ async function addNewStreamer(member, twitchID, m) {
 */
 async function pollLive() {
     await MongoClient.connect(config.mongoAddress, {useNewUrlParser: true}, (err, client) => {
-        var interval = setInterval (async function (client) {
+        setInterval (async function () {
             if (err) {
                 console.error(err);
                 client.close();
