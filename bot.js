@@ -294,20 +294,23 @@ async function addNewStreamer(member, twitchID, m) {
                                     if (err) {
                                         console.log(err);
                                         m.edit(`This user already exists in our database or there has been some sort of error.`);
+                                        client.close();
                                     } else {
                                         m.edit(`Welcome ${member} to the herts.gg stream team! We will track your streaming hours for your twitch rewards for you :)`);
+                                        client.close();
                                     }
                                 });
                             } else {
                                 m.edit(`We couldn't find ${twitchID} in the twitch database. Make sure it is spelt correctly.`);
+                                client.close();
                             }
                         }
                     });
                 } else {
                     m.edit(`This user already exists in our database or there has been some sort of error.`);
+                    client.close();
                 } 
             });
-            client.close();
         }
     });
 }
