@@ -450,9 +450,8 @@ async function pollLive() {
                     });
                 });
             }
-        });
-        
-    }, 1 * 60000);
+        }, 1 * 60000);
+    });
 }
 
 bot.login(config.token);
