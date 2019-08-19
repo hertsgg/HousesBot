@@ -315,13 +315,59 @@ async function addNewStreamer(member, twitchID, m) {
     });
 }
 
+/*async function checkHertsggLive(res, item, items) {
+    // If hertsgg are streaming, check the title for who is streaming
+    if (res.stream !== null && (item.twitchChannelId === '166854915' || item.twitchChannelId === '450976217')) {
+        if (item.hostingNow === null) {
+            for (var streamers = 0; streamers < items.length; streamers++) {
+                if (res.stream.channel.status.includes(items[streamers].twitchId)) {
+                    let message = await bot.channels.get(config.streamDiscord).send(items[streamers].twitchId + ` has gone live on hertsgg! Check them out here: https://www.twitch.tv/hertsgg`);
+                    if (items[streamers].recentStreamEnd !== null) {
+                        var timeSinceLastStream = moment.duration(moment(moment().format()).diff(moment(items[streamers].recentStreamEnd))).asDays();
+                        if (timeSinceLastStream >= 28) {
+                            collection.updateOne({twitchId: items[streamers].twitchId}, {'$set': {'streamStreakTime': 0}}, (err, res) => {
+                                if (err) {
+                                    client.close();
+                                    console.error(err);
+                                } else {
+
+                                }
+                                });
+                        }
+                    }
+                    // Update hosted channels stats
+                    collection.updateMany({twitchId: items[streamers].twitchId}, {'$set': {'streamingNow': true, 'recentStreamStart': moment().format(), 'streamMessage': message.id}});
+                    const newStreamer = {
+                        ...items[streamers],
+                        streamMessage: message.id
+                    }
+                    // Document the hosted channel in the hertsgg entry
+                    collection.updateOne({twitchId: item.twitchId}, {'$set': {'hostingNow': newStreamer}});
+                }
+            }
+        } 
+    // If hertsgg finish streaming, complete the normal streaming logic for the hosted channel
+    } else if (res.stream === null && (item.twitchChannelId === '166854915' || item.twitchChannelId === '450976217')) {
+        if (item.hostingNow !== null) {
+            var messageId = await item.hostingNow.streamMessage;
+            collection.updateOne({twitchId: item.twitchId}, {'$set': {'hostingNow': null}});
+            var durationOfStream = moment.duration(moment(moment().format()).diff(moment(item.hostingNow.recentStreamStart))).asHours();
+            var newStreak = item.hostingNow.streamStreakTime + durationOfStream;
+            var newAllTime = item.hostingNow.streamAllTime + durationOfStream;
+            collection.updateMany({twitchId: item.hostingNow.twitchId}, {'$set': {'streamingNow': false, 'streamMessage': null, 'recentStreamEnd': moment().format(), 'streamStreakTime': newStreak, 'streamAllTime': newAllTime}});   
+            await bot.channels.get(config.streamDiscord).fetchMessage(messageId).then(message => message.delete());
+                                                
+        }
+    }
+}*/
+
 /* 
 * This method is used to check the status of our twitch streamers once every minute, this method is also used
 * for connecting to our MongoDB database to track our streamer statistics.
 */
 async function pollLive() {
-    var interval = setInterval (async function () {
-        await MongoClient.connect(config.mongoAddress, {useNewUrlParser: true}, (err, client) => {
+    await MongoClient.connect(config.mongoAddress, {useNewUrlParser: true}, (err, client) => {
+        var interval = setInterval (async function (client) {
             if (err) {
                 console.error(err);
                 client.close();
@@ -336,6 +382,7 @@ async function pollLive() {
                             if(err) {
                                 console.log(err);
                             } else {
+                                //checkHertsggLive(res, item, items);
                                 // If hertsgg are streaming, check the title for who is streaming
                                 if (res.stream !== null && (item.twitchChannelId === '166854915' || item.twitchChannelId === '450976217')) {
                                     if (item.hostingNow === null) {
@@ -345,17 +392,17 @@ async function pollLive() {
                                                 if (items[streamers].recentStreamEnd !== null) {
                                                     var timeSinceLastStream = moment.duration(moment(moment().format()).diff(moment(items[streamers].recentStreamEnd))).asDays();
                                                     if (timeSinceLastStream >= 28) {
-                                                        collection.updateOne({twitchId: items[streamers].twitchId}, {'$set': {'streamStreakTime': 0}});
+                                                        await collection.updateOne({twitchId: items[streamers].twitchId}, {'$set': {'streamStreakTime': 0}});
                                                     }
                                                 }
                                                 // Update hosted channels stats
-                                                collection.updateMany({twitchId: items[streamers].twitchId}, {'$set': {'streamingNow': true, 'recentStreamStart': moment().format(), 'streamMessage': message.id}});
+                                                await collection.updateMany({twitchId: items[streamers].twitchId}, {'$set': {'streamingNow': true, 'recentStreamStart': moment().format(), 'streamMessage': message.id}});
                                                 const newStreamer = {
                                                     ...items[streamers],
                                                     streamMessage: message.id
                                                 }
                                                 // Document the hosted channel in the hertsgg entry
-                                                collection.updateOne({twitchId: item.twitchId}, {'$set': {'hostingNow': newStreamer}});
+                                                await collection.updateOne({twitchId: item.twitchId}, {'$set': {'hostingNow': newStreamer}});
                                             }
                                         }
                                     } 
@@ -363,11 +410,11 @@ async function pollLive() {
                                 } else if (res.stream === null && (item.twitchChannelId === '166854915' || item.twitchChannelId === '450976217')) {
                                     if (item.hostingNow !== null) {
                                         var messageId = await item.hostingNow.streamMessage;
-                                        collection.updateOne({twitchId: item.twitchId}, {'$set': {'hostingNow': null}});
+                                        await collection.updateOne({twitchId: item.twitchId}, {'$set': {'hostingNow': null}});
                                         var durationOfStream = moment.duration(moment(moment().format()).diff(moment(item.hostingNow.recentStreamStart))).asHours();
                                         var newStreak = item.hostingNow.streamStreakTime + durationOfStream;
                                         var newAllTime = item.hostingNow.streamAllTime + durationOfStream;
-                                        collection.updateMany({twitchId: item.hostingNow.twitchId}, {'$set': {'streamingNow': false, 'streamMessage': null, 'recentStreamEnd': moment().format(), 'streamStreakTime': newStreak, 'streamAllTime': newAllTime}});   
+                                        await collection.updateMany({twitchId: item.hostingNow.twitchId}, {'$set': {'streamingNow': false, 'streamMessage': null, 'recentStreamEnd': moment().format(), 'streamStreakTime': newStreak, 'streamAllTime': newAllTime}});   
                                         await bot.channels.get(config.streamDiscord).fetchMessage(messageId).then(message => message.delete());
                                                                             
                                     }
@@ -386,22 +433,22 @@ async function pollLive() {
                                     if (item.recentStreamEnd !== null) {
                                         var timeSinceLastStream = moment.duration(moment(moment().format()).diff(moment(item.recentStreamEnd))).asDays();
                                         if (timeSinceLastStream >= 28) {
-                                            collection.updateOne({twitchId: item.twitchId}, {'$set': {'streamStreakTime': 0}});
+                                            await collection.updateMany({twitchId: item.twitchId}, {'$set': {'streamStreakTime': 0, 'streamingNow': true, 'recentStreamStart': moment().format(), 'streamMessage': message.id}});
                                         }
+                                    } else {
+                                        await collection.updateMany({twitchId: item.twitchId}, {'$set': {'streamingNow': true, 'recentStreamStart': moment().format(), 'streamMessage': message.id}});
                                     }
-                                    collection.updateMany({twitchId: item.twitchId}, {'$set': {'streamingNow': true, 'recentStreamStart': moment().format(), 'streamMessage': message.id}});
                                 } else if (res.stream === null && item.streamingNow === true && item.twitchChannelId !== '166854915') { // && item.twitchChannelId !== '450976217') {
                                     var durationOfStream = moment.duration(moment(moment().format()).diff(moment(item.recentStreamStart))).asHours();
                                     var newStreak = item.streamStreakTime + durationOfStream;
                                     var newAllTime = item.streamAllTime + durationOfStream;
                                     await bot.channels.get(config.streamDiscord).fetchMessage(item.streamMessage).then(message => message.delete());
-                                    collection.updateMany({twitchId: item.twitchId}, {'$set': {'streamingNow': false, 'streamMessage': null, 'recentStreamEnd': moment().format(), 'streamStreakTime': newStreak, 'streamAllTime': newAllTime}});
+                                    await collection.updateMany({twitchId: item.twitchId}, {'$set': {'streamingNow': false, 'streamMessage': null, 'recentStreamEnd': moment().format(), 'streamStreakTime': newStreak, 'streamAllTime': newAllTime}});
                                 }
                             }
                         });
                     });
                 });
-                client.close();
             }
         });
         
