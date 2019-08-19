@@ -287,11 +287,12 @@ async function addNewStreamer(member, twitchID, m) {
                     twitch.users.usersByName({ users: twitchID }, (err, res) => {
                         if(err) {
                             console.log(err);
-                            m.edit(`This user already exists in our database or there has been some sort of error.`);
+                            m.edit(`We couldn't find ${twitchID} in the twitch database. Make sure it is spelt correctly.`);
                         } else {
                             if (res.users.length === 1) {
                                 collection.insertOne({userId: member.id, twitchId: twitchID, twitchChannelId: res.users[0]._id, streamingNow: false, streamStreakTime: 0, streamAllTime: 0, recentStreamStart: null, recentStreamEnd: null}, (err, res) => {
                                     if (err) {
+                                        console.log(err);
                                         m.edit(`This user already exists in our database or there has been some sort of error.`);
                                     } else {
                                         m.edit(`Welcome ${member} to the herts.gg stream team! We will track your streaming hours for your twitch rewards for you :)`);
