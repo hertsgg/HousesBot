@@ -434,6 +434,8 @@ async function pollLive() {
                                         var timeSinceLastStream = moment.duration(moment(moment().format()).diff(moment(item.recentStreamEnd))).asDays();
                                         if (timeSinceLastStream >= 28) {
                                             await collection.updateMany({twitchId: item.twitchId}, {'$set': {'streamStreakTime': 0, 'streamingNow': true, 'recentStreamStart': moment().format(), 'streamMessage': message.id}});
+                                        } else {
+                                            await collection.updateMany({twitchId: item.twitchId}, {'$set': {'streamingNow': true, 'recentStreamStart': moment().format(), 'streamMessage': message.id}});
                                         }
                                     } else {
                                         await collection.updateMany({twitchId: item.twitchId}, {'$set': {'streamingNow': true, 'recentStreamStart': moment().format(), 'streamMessage': message.id}});
