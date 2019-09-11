@@ -115,10 +115,12 @@ bot.on("message", async message => {
                     mem.addRole(verifiedRole.id).catch(console.error);
                     if (arg === "nohouse") {
                         message.channel.send(`Congratulations ${mem}! You're now verified!`);
+                        message.delete(1000);
                         break;
                     }
                     mem.addRole(sortingHat[sortingChoice]);
                     message.channel.send(`Congratulations ${mem}! You're now verified! The sorting hat has selected ${sortingHat[sortingChoice]} as your new house!`);
+                    message.delete(1000);
                 }
                 break;
             }
