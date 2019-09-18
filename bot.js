@@ -429,10 +429,17 @@ async function pollLive() {
                                     if (item.hostingNow !== null) {
                                         var messageId = await item.hostingNow.streamMessage;
                                         await collection.updateOne({twitchId: item.twitchId}, {'$set': {'hostingNow': null}});
-                                        var durationOfStream = moment.duration(moment(moment().format()).diff(moment(item.hostingNow.recentStreamStart))).asHours();
-                                        var newStreak = item.hostingNow.streamStreakTime + durationOfStream;
-                                        var newAllTime = item.hostingNow.streamAllTime + durationOfStream;
-                                        await collection.updateMany({twitchId: item.hostingNow.twitchId}, {'$set': {'streamingNow': false, 'streamMessage': null, 'recentStreamEnd': moment().format(), 'streamStreakTime': newStreak, 'streamAllTime': newAllTime}});   
+                                        if (item.hostingNow === null) {
+                                            var durationOfStream = Math.floor(moment.duration(moment(moment().format()).diff(moment(item.hostingNow.recentStreamStart))).asHours())*3;
+                                            var newStreak = item.hostingNow.streamStreakTime + durationOfStream;
+                                            var newAllTime = item.hostingNow.streamAllTime + durationOfStream;
+                                            await collection.updateMany({twitchId: item.hostingNow.twitchId}, {'$set': {'streamingNow': false, 'streamMessage': null, 'recentStreamEnd': moment().format(), 'streamStreakTime': newStreak, 'streamAllTime': newAllTime}}); 
+                                        } else {
+                                            var durationOfStream = Math.floor(moment.duration(moment(moment().format()).diff(moment(item.recentStreamStart))).asHours());
+                                            var newStreak = item.streamStreakTime + durationOfStream;
+                                            var newAllTime = item.streamAllTime + durationOfStream;
+                                            await collection.updateMany({twitchId: item.twitchId}, {'$set': {'streamingNow': false, 'streamMessage': null, 'recentStreamEnd': moment().format(), 'streamStreakTime': newStreak, 'streamAllTime': newAllTime}});
+                                        }
                                         await bot.channels.get(config.streamDiscord).fetchMessage(messageId).then(message => message.delete());
                                                                             
                                     }
@@ -459,7 +466,7 @@ async function pollLive() {
                                         await collection.updateMany({twitchId: item.twitchId}, {'$set': {'streamingNow': true, 'recentStreamStart': moment().format(), 'streamMessage': message.id}});
                                     }
                                 } else if (res.stream === null && item.streamingNow === true && item.twitchChannelId !== '166854915') { // && item.twitchChannelId !== '450976217') {
-                                    var durationOfStream = moment.duration(moment(moment().format()).diff(moment(item.recentStreamStart))).asHours();
+                                    var durationOfStream = Math.floor(moment.duration(moment(moment().format()).diff(moment(item.recentStreamStart))).asHours());
                                     var newStreak = item.streamStreakTime + durationOfStream;
                                     var newAllTime = item.streamAllTime + durationOfStream;
                                     await bot.channels.get(config.streamDiscord).fetchMessage(item.streamMessage).then(message => message.delete());
