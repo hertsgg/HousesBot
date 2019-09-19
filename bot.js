@@ -411,7 +411,7 @@ async function pollLive() {
                                         }
                                         // If no one is streaming specifcally from the stream team then it must be us.
                                         if (!streamTeam) {
-                                            let message = await bot.channels.get(config.streamDiscord).send(`We just went live! Check us out here: https://www.twitch.tv/hertsgg}`);
+                                            let message = await bot.channels.get(config.streamDiscord).send(`We just went live! Check us out here: https://www.twitch.tv/hertsgg`);
                                             if (item.recentStreamEnd !== null) {
                                                 var timeSinceLastStream = moment.duration(moment(moment().format()).diff(moment(item.recentStreamEnd))).asDays();
                                                 if (timeSinceLastStream >= 28) {
