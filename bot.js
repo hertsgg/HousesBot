@@ -440,8 +440,6 @@ async function pollLive() {
                                         await collection.updateMany({twitchId: item.twitchId}, {'$set': {'streamingNow': false, 'streamMessage': null, 'recentStreamEnd': moment().format(), 'streamStreakTime': newStreak, 'streamAllTime': newAllTime}});
                                     }
                                     await bot.channels.get(config.streamDiscord).fetchMessage(messageId).then(message => message.delete());
-                                                                            
-                                    }
                                 }
                             }
                         }); 
