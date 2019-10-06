@@ -450,7 +450,7 @@ async function pollLive() {
                             if(err) {
                                 console.log(err);
                             } else {
-                                if (res.stream !== null && item.streamingNow === false && item.twitchChannelId !== '166854915') {// && item.twitchChannelId !== '450976217') {
+                                if (res.stream !== null && item.streamingNow === false && (item.twitchChannelId !== '166854915' || item.twitchChannelId === '450976217')) {// && item.twitchChannelId !== '450976217') {
                                     let message = await bot.channels.get(config.streamDiscord).send(`${item.twitchId} has gone live! Check them out here: https://www.twitch.tv/${item.twitchId}`);
                                     if (item.recentStreamEnd !== null) {
                                         var timeSinceLastStream = moment.duration(moment(moment().format()).diff(moment(item.recentStreamEnd))).asDays();
