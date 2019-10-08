@@ -427,7 +427,6 @@ async function pollLive() {
                                 // If hertsgg finish streaming, complete the normal streaming logic for the hosted channel
                                 } else if (item.streamingNow === true && res.stream === null && (item.twitchChannelId === '166854915' || item.twitchChannelId === '450976217')) {
                                     if (item.hostingNow !== null) {
-                                        var messageId = await item.hostingNow.streamMessage;
                                         await collection.updateOne({twitchId: item.twitchId}, {'$set': {'hostingNow': null}});
                                         var durationOfStream = Math.floor(moment.duration(moment(moment().format()).diff(moment(item.hostingNow.recentStreamStart))).asHours()*3);
                                         var newStreak = item.hostingNow.streamStreakTime + durationOfStream;
@@ -439,6 +438,7 @@ async function pollLive() {
                                         var newAllTime = item.streamAllTime + durationOfStream;
                                         await collection.updateMany({twitchId: item.twitchId}, {'$set': {'streamingNow': false, 'streamMessage': null, 'recentStreamEnd': moment().format(), 'streamStreakTime': newStreak, 'streamAllTime': newAllTime}});
                                     }
+                                    var messageId = await item.hostingNow.streamMessage;
                                     await bot.channels.get(config.streamDiscord).fetchMessage(messageId).then(message => message.delete());
                                 }
                             }
