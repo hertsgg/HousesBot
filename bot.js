@@ -432,14 +432,16 @@ async function pollLive() {
                                         var newStreak = item.hostingNow.streamStreakTime + durationOfStream;
                                         var newAllTime = item.hostingNow.streamAllTime + durationOfStream;
                                         await collection.updateMany({twitchId: item.hostingNow.twitchId}, {'$set': {'streamingNow': false, 'streamMessage': null, 'recentStreamEnd': moment().format(), 'streamStreakTime': newStreak, 'streamAllTime': newAllTime}}); 
+                                        var messageId = await item.hostingNow.streamMessage;
+                                        await bot.channels.get(config.streamDiscord).fetchMessage(messageId).then(message => message.delete());
                                     } else {
                                         var durationOfStream = Math.floor(moment.duration(moment(moment().format()).diff(moment(item.recentStreamStart))).asHours());
                                         var newStreak = item.streamStreakTime + durationOfStream;
                                         var newAllTime = item.streamAllTime + durationOfStream;
                                         await collection.updateMany({twitchId: item.twitchId}, {'$set': {'streamingNow': false, 'streamMessage': null, 'recentStreamEnd': moment().format(), 'streamStreakTime': newStreak, 'streamAllTime': newAllTime}});
+                                        var messageId = await item.streamMessage;
+                                        await bot.channels.get(config.streamDiscord).fetchMessage(messageId).then(message => message.delete());
                                     }
-                                    var messageId = await item.hostingNow.streamMessage;
-                                    await bot.channels.get(config.streamDiscord).fetchMessage(messageId).then(message => message.delete());
                                 }
                             }
                         });
