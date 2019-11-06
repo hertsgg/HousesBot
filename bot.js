@@ -257,6 +257,10 @@ bot.on("message", async message => {
                 message.reply(`Sorry, you don't have permission to add new streamers`)
                 break;
             }
+        case "checkmypoints":
+            const mess = await message.channel.send("Checking points...");
+            await checkMyPoints(message.author.id, mess);
+            break;
 
         default:
             message.channel.send(`Sorry, I don't quite understand what you're asking. You can find more information about me here: \n\n https://github.com/hertsgg/HousesBot`);
@@ -267,6 +271,32 @@ bot.on("message", async message => {
 
 async function add(member,choice) {
     await member.addRole(choice).catch(console.error);
+}
+
+async function checkMyPoints(userId, m) {
+    await MongoClient.connect(config.mongoAddress, {useNewUrlParser: true}, (err, client) => {
+        if (err) {
+            console.error(err);
+            client.close();
+            return;
+        } else {
+            const db = client.db("hertsgg");
+            const collection = db.collection("twitch-stats");
+            var exists = false;
+            collection.find().toArray((err, items) => {
+                items.forEach(item => {
+                    if (userId === item.userId) {
+                        exists = true;
+                        m.edit(`So far ${item.twitchId} has earned ${item.streamAllTime} points`);
+                    }
+                });
+            });
+        }
+        if (!exists) {
+            m.edit(`We couldn't find you in the our database, are you a part of our stream team? Sign up at http://streamteam.herts.gg`);
+        }
+        client.close();
+    });
 }
 
 async function addNewStreamer(member, twitchID, m) {
