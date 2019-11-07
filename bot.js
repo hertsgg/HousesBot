@@ -293,7 +293,7 @@ async function checkMyPoints(userId, m) {
             });
         }
         if (!exists) {
-            m.edit(`We couldn't find you in the our database, are you a part of our stream team? Sign up at http://streamteam.herts.gg`);
+            m.edit(`We couldn't find you in the our database, are you a part of our stream team? Sign up at <http://streamteam.herts.gg>`);
         }
         client.close();
     });
