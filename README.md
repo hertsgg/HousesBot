@@ -18,6 +18,7 @@ to check how many points their house has.
 `!shuffle` to shuffle all members into randomly assigned houses <br />
 `!alumni @NAME` to give a member the Society Alumni role <br />
 `!addstreamer @NAME @TWITCHID` to add a streamer to our database to be tracked for stats <br />
+`!checkmypoints` to check your current points earned as a streamer <br />
 
 ## Setting up config.json
 
