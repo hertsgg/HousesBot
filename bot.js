@@ -429,8 +429,8 @@ async function pollLive() {
                                                         await collection.updateOne({twitchId: items[streamers].twitchId}, {'$set': {'streamStreakTime': 0}});
                                                     }
                                                 }
-                                                // Update hosted channels stats
-                                                await collection.updateMany({twitchId: items[streamers].twitchId}, {'$set': {'streamingNow': true, 'recentStreamStart': moment().format(), 'streamMessage': message.id}});
+                                                // Save hosted channel stats here
+                                                await collection.updateMany({twitchId: item.twitchId}, {'$set': {'streamingNow': true, 'recentStreamStart': moment().format(), 'streamMessage': message.id}});
                                                 const newStreamer = {
                                                     ...items[streamers],
                                                     streamMessage: message.id
@@ -458,20 +458,20 @@ async function pollLive() {
                                 } else if (item.streamingNow === true && res.stream === null && (item.twitchChannelId === '166854915' || item.twitchChannelId === '450976217')) {
                                     if (item.hostingNow !== null) {
                                         await collection.updateOne({twitchId: item.twitchId}, {'$set': {'hostingNow': null}});
-                                        var durationOfStream = Math.floor(moment.duration(moment(moment().format()).diff(moment(item.hostingNow.recentStreamStart))).asHours()*3);
+                                        var durationOfStream = Math.floor(moment.duration(moment(moment().format()).diff(moment(item.recentStreamStart))).asHours()*3);
                                         var newStreak = item.hostingNow.streamStreakTime + durationOfStream;
                                         var newAllTime = item.hostingNow.streamAllTime + durationOfStream;
-                                        await collection.updateMany({twitchId: item.hostingNow.twitchId}, {'$set': {'streamingNow': false, 'streamMessage': null, 'recentStreamEnd': moment().format(), 'streamStreakTime': newStreak, 'streamAllTime': newAllTime}}); 
-                                        var messageId = await item.hostingNow.streamMessage;
-                                        await bot.channels.get(config.streamDiscord).fetchMessage(messageId).then(message => message.delete());
+                                        await collection.updateMany({twitchId: item.hostingNow.twitchId}, {'$set': {'recentStreamEnd': moment().format(), 'streamStreakTime': newStreak, 'streamAllTime': newAllTime}}); 
                                     } else {
                                         var durationOfStream = Math.floor(moment.duration(moment(moment().format()).diff(moment(item.recentStreamStart))).asHours());
                                         var newStreak = item.streamStreakTime + durationOfStream;
                                         var newAllTime = item.streamAllTime + durationOfStream;
-                                        await collection.updateMany({twitchId: item.twitchId}, {'$set': {'streamingNow': false, 'streamMessage': null, 'recentStreamEnd': moment().format(), 'streamStreakTime': newStreak, 'streamAllTime': newAllTime}});
-                                        var messageId = await item.streamMessage;
-                                        await bot.channels.get(config.streamDiscord).fetchMessage(messageId).then(message => message.delete());
+                                        await collection.updateMany({twitchId: item.twitchId}, {'$set': {'recentStreamEnd': moment().format(), 'streamStreakTime': newStreak, 'streamAllTime': newAllTime}});
+
                                     }
+                                    var messageId = await item.streamMessage;
+                                    await bot.channels.get(config.streamDiscord).fetchMessage(messageId).then(message => message.delete());
+                                    await collection.updateMany({twitchId: item.twitchId}, {'$set': {'streamingNow': false, 'streamMessage': null, 'hostingNow': null}});
                                 }
                             }
                         });
