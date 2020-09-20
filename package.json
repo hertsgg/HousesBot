@@ -1,24 +1,35 @@
 {
-   "name": "greeter-bot",
-   "version": "1.0.0",
-   "description": "Houses Bot",
-   "main": "bot.js",
-   "author": "Stefan Cooper",
-   "dependencies": {
-      "discord.io": "https://github.com/woor/discord.io/tarball/gateway_v6",
-      "discord.js": "^11.4.2",
-      "dotenv": "^8.2.0",
-      "moment": "^2.24.0",
-      "mongodb": "^3.3.0-beta2",
-      "twitch-api-v5": "^2.0.4",
-      "winston": "^3.2.1"
-   },
-   "engines": {
-      "node": "12.x",
-      "npm":  "*"
-   },
-   "scripts": {
-      "test": "echo \"Error: no test specified\" && exit 1",
-      "start": "node bot.js"
-   }
+  "name": "greeter-bot",
+  "version": "1.0.0",
+  "description": "Houses Bot",
+  "main": "bot.js",
+  "author": "Stefan Cooper",
+  "dependencies": {
+    "discord.io": "https://github.com/woor/discord.io/tarball/gateway_v6",
+    "discord.js": "^11.4.2",
+    "dotenv": "^8.2.0",
+    "moment": "^2.24.0",
+    "mongodb": "^3.3.0-beta2",
+    "twitch-api-v5": "^2.0.4",
+    "winston": "^3.2.1"
+  },
+  "engines": {
+    "node": "12.x",
+    "npm": "*"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node bot.js"
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hertsgg/HousesBot.git"
+  },
+  "keywords": [],
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/hertsgg/HousesBot/issues"
+  },
+  "homepage": "https://github.com/hertsgg/HousesBot#readme"
 }
