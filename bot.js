@@ -376,7 +376,7 @@ async function updateHertsGGInfo(streamer, hertsgg, collection, message) {
         ...streamer,
         streamMessage: message.id
     }
-    await collection.updateOne({twitchId: hertsgg.twitchId}, {'$set': {'hostingNow': newStreamer}});
+    await collection.updateMany({twitchId: hertsgg.twitchId}, {'$set': {'streamingNow': true, 'recentStreamStart': moment().format(), 'hostingNow': newStreamer}});
 }
 
 async function checkStreamTeamOnHertsgg(items, hertsgg, status, collection) {
@@ -400,7 +400,7 @@ async function setupHertsggStream(hertsgg, collection) {
 }
 
 async function updateHostedChannelStatsPostStream(hertsgg, collection) {
-    await collection.updateOne({twitchId: hertsgg.twitchId}, {'$set': {'hostingNow': null}});
+    await collection.updateMany({twitchId: hertsgg.twitchId}, {'$set': {'streamingNow': false, 'recentStreamEnd': moment().format(), 'hostingNow': null}});
     var durationOfStream = Math.floor(moment.duration(moment(moment().format()).diff(moment(hertsgg.recentStreamStart))).asHours()*3);
     await updateChannelStatsPostStream(hertsgg.hostingNow, collection, durationOfStream)
 }
@@ -423,6 +423,7 @@ function goneLive(stream, streamingNow) {
     return (stream !== null && streamingNow === false)
 }
 
+// Does not delete message when stream team finishes streaming on hertsgg
 async function checkHertsggLive(items, collection) {
     items.forEach(item => {
         twitch.streams.channel({ channelID: item.twitchChannelId }, async (err, res) => {
