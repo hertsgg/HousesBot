@@ -380,7 +380,7 @@ async function updateHertsGGInfo(streamer, hertsgg, collection, message) {
         ...streamer,
         streamMessage: message.id
     }
-    await collection.updateMany({twitchId: hertsgg.twitchId}, {'$set': {'streamingNow': true, 'recentStreamStart': moment().format(), 'hostingNow': newStreamer}});
+    await collection.updateMany({twitchId: hertsgg.twitchId}, {'$set': {'streamingNow': true, 'streamMessage': message.id, 'recentStreamStart': moment().format(), 'hostingNow': newStreamer}});
 }
 
 async function checkStreamTeamOnHertsgg(items, hertsgg, status, collection) {
