@@ -2,16 +2,16 @@ const Discord = require("discord.js");
 
 // Initialize Discord Bot
 const bot = new Discord.Client({forceFetchUsers: true});
-const config = require("./config.json");
+require('dotenv').config();
 const moment = require('moment');
 
 //Connect to Twitch Client
 var twitch = require('twitch-api-v5');
-twitch.clientID = config.twitchClientId;
+twitch.clientID = process.env.twitchClientId;
 
 //Establish connection to MongoDB
 const MongoClient = require('mongodb').MongoClient;
-MongoClient.connect(config.mongoAddress, {useNewUrlParser: true}, (err, client) => {
+MongoClient.connect(process.env.mongoAddress, {useNewUrlParser: true}, (err, client) => {
     if (err) {
         console.error(err);
         client.close()
@@ -26,17 +26,17 @@ MongoClient.connect(config.mongoAddress, {useNewUrlParser: true}, (err, client) 
 
 //Initial setup
 bot.on("ready", () => {
-   const list = bot.guilds.get(config.serverID);
+   const list = bot.guilds.get(process.env.serverID);
    console.log(`Bot has started: Users: ${list.members.size} ${list.memberCount}; Channels: ${bot.channels.size}; Servers: ${bot.guilds.size}`); 
 });
 
 //Chat commands, message replies
 bot.on("message", async message => {
-   if (message.content.indexOf(config.prefix) !== 0) return;
-   const list = bot.guilds.get(config.serverID);
+   if (message.content.indexOf(process.env.prefix) !== 0) return;
+   const list = bot.guilds.get(process.env.serverID);
    await list.fetchMembers();
    console.log(`${list.members.size}`);
-   const args = message.content.slice(config.prefix.length).trim().split(/ +/g);
+   const args = message.content.slice(process.env.prefix.length).trim().split(/ +/g);
    const command = args.shift().toLowerCase();
 
    switch (command) {
@@ -46,55 +46,55 @@ bot.on("message", async message => {
             m.edit(`Pong! Latency is ${m.createdTimestamp - message.createdTimestamp}ms. API Latency is ${Math.round(bot.ping)}ms`);
             break;
 
-        // Add scores to houses
-        case "add":
-            // ensure committee are the only people to add scores to houses
-            if (message.member.roles.has(config.committeeID)) {
-                let house = args[0];
-                let newScoreString = args[1];
-                let scoreInt = 0;
-                let scoreString = ''; 
-                if (house.toUpperCase() === "SLYTHERIN" ) {
-                scoreString = message.guild.roles.get(config.slytherinID);
-                scoreInt = parseInt(scoreString.name);
-                }
-                else if (house.toUpperCase() === "SSB" ) {
-                scoreString = message.guild.roles.get(config.ssbID);
-                scoreInt = parseInt(scoreString.name);
-                }
-                else if (house.toUpperCase() === "STEFCYKA" ) {
-                scoreString = message.guild.roles.get(config.stefcykaID); 
-                scoreInt = parseInt(scoreString.name);
-                }
-                else if (house.toUpperCase() === "DANNISTER" ) {
-                scoreString = message.guild.roles.get(config.dannisterID); 
-                scoreInt = parseInt(scoreString.name);
-                }
-                else {
-                message.reply(`the house ${house} doesn't exist`);
-                break;
-                }
+        // // Add scores to houses
+        // case "add":
+        //     // ensure committee are the only people to add scores to houses
+        //     if (message.member.roles.has(process.env.committeeID)) {
+        //         let house = args[0];
+        //         let newScoreString = args[1];
+        //         let scoreInt = 0;
+        //         let scoreString = ''; 
+        //         if (house.toUpperCase() === "SLYTHERIN" ) {
+        //         scoreString = message.guild.roles.get(process.env.slytherinID);
+        //         scoreInt = parseInt(scoreString.name);
+        //         }
+        //         else if (house.toUpperCase() === "SSB" ) {
+        //         scoreString = message.guild.roles.get(process.env.ssbID);
+        //         scoreInt = parseInt(scoreString.name);
+        //         }
+        //         else if (house.toUpperCase() === "STEFCYKA" ) {
+        //         scoreString = message.guild.roles.get(process.env.stefcykaID); 
+        //         scoreInt = parseInt(scoreString.name);
+        //         }
+        //         else if (house.toUpperCase() === "DANNISTER" ) {
+        //         scoreString = message.guild.roles.get(process.env.dannisterID); 
+        //         scoreInt = parseInt(scoreString.name);
+        //         }
+        //         else {
+        //         message.reply(`the house ${house} doesn't exist`);
+        //         break;
+        //         }
                 
-                let newScoreInt = parseInt(newScoreString);
-                newScoreInt += scoreInt;
-                let newScore = newScoreInt.toString();
-                scoreString.edit({name: newScore});
-                message.reply(`added score to ${house}. New score: ${newScoreInt} Old score: ${scoreString.name}`);
-                break;
-            }
-            else {
-            message.reply(`Sorry you don't have permission to add scores to houses`);
-            break;
-            }
+        //         let newScoreInt = parseInt(newScoreString);
+        //         newScoreInt += scoreInt;
+        //         let newScore = newScoreInt.toString();
+        //         scoreString.edit({name: newScore});
+        //         message.reply(`added score to ${house}. New score: ${newScoreInt} Old score: ${scoreString.name}`);
+        //         break;
+        //     }
+        //     else {
+        //     message.reply(`Sorry you don't have permission to add scores to houses`);
+        //     break;
+        //     }
 
-        // Leaderboard command to see where each house stands
-        case "leaderboard":
-            dannisterScore = message.guild.roles.get(config.dannisterID); 
-            stefcykaScore= message.guild.roles.get(config.stefcykaID);
-            ssbScore = message.guild.roles.get(config.ssbID);
-            slytherinScore = message.guild.roles.get(config.slytherinID); 
-            message.channel.send(`\n **Slytherin**: *${slytherinScore.name}* \n**Team StefCyka**: *${stefcykaScore.name}* \n**House Dannister** *${dannisterScore.name}* \n**SSB Clan** *${ssbScore.name}*`);
-            break;
+        // // Leaderboard command to see where each house stands
+        // case "leaderboard":
+        //     dannisterScore = message.guild.roles.get(process.env.dannisterID); 
+        //     stefcykaScore= message.guild.roles.get(process.env.stefcykaID);
+        //     ssbScore = message.guild.roles.get(process.env.ssbID);
+        //     slytherinScore = message.guild.roles.get(process.env.slytherinID); 
+        //     message.channel.send(`\n **Slytherin**: *${slytherinScore.name}* \n**Team StefCyka**: *${stefcykaScore.name}* \n**House Dannister** *${dannisterScore.name}* \n**SSB Clan** *${ssbScore.name}*`);
+        //     break;
 
         // Verify members/Assign them their house
         case "verify":
@@ -105,7 +105,7 @@ bot.on("message", async message => {
             let dannisterID = message.guild.roles.find(role => role.name === "House Dannister");
             let sortingChoice = Math.floor(Math.random()*(4-1+1)+1);
             let sortingHat = [0,slytherinID,stefcykaID,ssbID,dannisterID];
-            if (message.member.roles.has(config.committeeID)) {
+            if (message.member.roles.has(process.env.committeeID)) {
                 let mem = message.mentions.members.first();
                 let verifiedRole = message.guild.roles.find(role => role.name === "✔️ Verified Member");
                 if (mem.roles.has(verifiedRole.id)) {
@@ -131,7 +131,7 @@ bot.on("message", async message => {
         
         // Quickly remove all members of houses or verified members
         case "purge":
-            if (message.member.roles.has(config.committeeID)) {
+            if (message.member.roles.has(process.env.committeeID)) {
                 let type = args[0];
                 let confirm = args[1];
                 let count = 0;
@@ -149,24 +149,24 @@ bot.on("message", async message => {
                                            Type '!purge verified confirm' if you're sure!`);
                         }
                         break;
-                    case "houses":
-                        if (confirm === "confirm") {
-                            let slytherinID = message.guild.roles.find(role => role.name === "Slytherin");
-                            let stefcykaID = message.guild.roles.find(role => role.name === "Team StefCyka");
-                            let ssbID = message.guild.roles.find(role => role.name === "SSB Clan");
-                            let dannisterID = message.guild.roles.find(role => role.name === "House Dannister");
-                            list.members.forEach(member => {
-                                if (member.roles.has(slytherinID.id)) member.removeRole(slytherinID)
-                                else if (member.roles.has(stefcykaID.id)) member.removeRole(stefcykaID)
-                                else if (member.roles.has(ssbID.id)) member.removeRole(ssbID)
-                                else if (member.roles.has(dannisterID.id)) member.removeRole(dannisterID)
-                            });
-                            message.reply("All house members roles' removed");
-                        }
-                        else {
-                            message.reply(`Woah are you sure you want to do this? This will remove all the houses roles on the server. 
-                                           Type '!purge houses confirm' if you're sure!`);
-                        }
+                    // case "houses":
+                    //     if (confirm === "confirm") {
+                    //         let slytherinID = message.guild.roles.find(role => role.name === "Slytherin");
+                    //         let stefcykaID = message.guild.roles.find(role => role.name === "Team StefCyka");
+                    //         let ssbID = message.guild.roles.find(role => role.name === "SSB Clan");
+                    //         let dannisterID = message.guild.roles.find(role => role.name === "House Dannister");
+                    //         list.members.forEach(member => {
+                    //             if (member.roles.has(slytherinID.id)) member.removeRole(slytherinID)
+                    //             else if (member.roles.has(stefcykaID.id)) member.removeRole(stefcykaID)
+                    //             else if (member.roles.has(ssbID.id)) member.removeRole(ssbID)
+                    //             else if (member.roles.has(dannisterID.id)) member.removeRole(dannisterID)
+                    //         });
+                    //         message.reply("All house members roles' removed");
+                    //     }
+                    //     else {
+                    //         message.reply(`Woah are you sure you want to do this? This will remove all the houses roles on the server. 
+                    //                        Type '!purge houses confirm' if you're sure!`);
+                    //     }
                         break;
                     default:
                         message.reply("You can only purge the following types: `houses` or `verified`");
@@ -179,51 +179,51 @@ bot.on("message", async message => {
                 break;
             }
 
-        // Shuffle houses
-        case "shuffle":
-            if (message.member.roles.has(config.committeeID)) {
-                let confirm = args[0];
-                const msg = await message.channel.send("Checking "+list.members.size+" users...");
-                if (confirm === "confirm") {
-                    let membersShuffled = 1;
-                    let rolesRemoved = 0;
-                    const m = await message.channel.send("Sorting verified members...");
-                    let verifiedRole = message.guild.roles.find(role => role.name === "✔️ Verified Member");
-                    let slytherinID = message.guild.roles.find(role => role.name === "Slytherin");
-                    let stefcykaID = message.guild.roles.find(role => role.name === "Team StefCyka");
-                    let ssbID = message.guild.roles.find(role => role.name === "SSB Clan");
-                    let dannisterID = message.guild.roles.find(role => role.name === "House Dannister");
-                    list.members.forEach(member => {
-                        if (member.roles.has(verifiedRole.id)) {
-                            if (member.roles.has(slytherinID.id)) member.removeRole(slytherinID)
-                            else if (member.roles.has(stefcykaID.id)) member.removeRole(stefcykaID)
-                            else if (member.roles.has(ssbID.id)) member.removeRole(ssbID)
-                            else if (member.roles.has(dannisterID.id)) member.removeRole(dannisterID)
-                            rolesRemoved++;
-                            m.edit(`${message.author} Roles removed: ${rolesRemoved} Members Shuffled: ${membersShuffled-1}`);
-                            setTimeout(function(){
-                                let sortingChoice = Math.floor(Math.random()*(4-1+1)+1);
-                                let sortingHat = [0,slytherinID,stefcykaID,ssbID,dannisterID];
-                                add(member,sortingHat[sortingChoice])
-                                m.edit(`${message.author} Roles removed: ${rolesRemoved} Members Shuffled: ${membersShuffled-1}`);
-                                membersShuffled++;
+        // // Shuffle houses
+        // case "shuffle":
+        //     if (message.member.roles.has(process.env.committeeID)) {
+        //         let confirm = args[0];
+        //         const msg = await message.channel.send("Checking "+list.members.size+" users...");
+        //         if (confirm === "confirm") {
+        //             let membersShuffled = 1;
+        //             let rolesRemoved = 0;
+        //             const m = await message.channel.send("Sorting verified members...");
+        //             let verifiedRole = message.guild.roles.find(role => role.name === "✔️ Verified Member");
+        //             let slytherinID = message.guild.roles.find(role => role.name === "Slytherin");
+        //             let stefcykaID = message.guild.roles.find(role => role.name === "Team StefCyka");
+        //             let ssbID = message.guild.roles.find(role => role.name === "SSB Clan");
+        //             let dannisterID = message.guild.roles.find(role => role.name === "House Dannister");
+        //             list.members.forEach(member => {
+        //                 if (member.roles.has(verifiedRole.id)) {
+        //                     if (member.roles.has(slytherinID.id)) member.removeRole(slytherinID)
+        //                     else if (member.roles.has(stefcykaID.id)) member.removeRole(stefcykaID)
+        //                     else if (member.roles.has(ssbID.id)) member.removeRole(ssbID)
+        //                     else if (member.roles.has(dannisterID.id)) member.removeRole(dannisterID)
+        //                     rolesRemoved++;
+        //                     m.edit(`${message.author} Roles removed: ${rolesRemoved} Members Shuffled: ${membersShuffled-1}`);
+        //                     setTimeout(function(){
+        //                         let sortingChoice = Math.floor(Math.random()*(4-1+1)+1);
+        //                         let sortingHat = [0,slytherinID,stefcykaID,ssbID,dannisterID];
+        //                         add(member,sortingHat[sortingChoice])
+        //                         m.edit(`${message.author} Roles removed: ${rolesRemoved} Members Shuffled: ${membersShuffled-1}`);
+        //                         membersShuffled++;
                                 
-                            }, 5000);
-                        }
-                    });
-                    break;
-                }
-                else {
-                    message.reply(`Woah are you sure you want to do this? This will shuffle everyones houses in the server. Type '!shuffle confirm' if you're sure!`);
-                }
-            }
-            else {
-                message.reply(`Sorry, you don't have permission to shuffle members`);
-                break;
-            }
+        //                     }, 5000);
+        //                 }
+        //             });
+        //             break;
+        //         }
+        //         else {
+        //             message.reply(`Woah are you sure you want to do this? This will shuffle everyones houses in the server. Type '!shuffle confirm' if you're sure!`);
+        //         }
+        //     }
+        //     else {
+        //         message.reply(`Sorry, you don't have permission to shuffle members`);
+        //         break;
+        //     }
         
         case "alumni":
-            if (message.member.roles.has(config.committeeID)) {
+            if (message.member.roles.has(process.env.committeeID)) {
                 let arg = args[1];
                 let alumniRole = message.guild.roles.find(role => role.name === "Society Alumni");
                 let mem = message.mentions.members.first();
@@ -242,7 +242,7 @@ bot.on("message", async message => {
             }
         
         case "addstreamer":
-            if (message.member.roles.has(config.committeeID)) {
+            if (message.member.roles.has(process.env.committeeID)) {
                 if (!args[1] || !message.mentions.members.first()) {
                     message.reply('Incorrect syntax, try !addstreamer @discordId twitchId');
                     break;
@@ -274,7 +274,7 @@ async function add(member,choice) {
 }
 
 async function checkMyPoints(userId, m) {
-    await MongoClient.connect(config.mongoAddress, {useNewUrlParser: true}, (err, client) => {
+    await MongoClient.connect(process.env.mongoAddress, {useNewUrlParser: true}, (err, client) => {
         if (err) {
             console.error(err);
             client.close();
@@ -300,7 +300,7 @@ async function checkMyPoints(userId, m) {
 }
 
 async function addNewStreamer(member, twitchID, m) {
-    await MongoClient.connect(config.mongoAddress, {useNewUrlParser: true}, (err, client) => {
+    await MongoClient.connect(process.env.mongoAddress, {useNewUrlParser: true}, (err, client) => {
         if (err) {
             console.error(err);
             client.close();
@@ -368,7 +368,7 @@ async function updateChannelStatsPostStream(channel, collection, durationOfStrea
 
 async function deleteStreamAlert(item) {
     var messageId = await item.streamMessage;
-    await bot.channels.get(config.streamDiscord).fetchMessage(messageId).then(message => message.delete());
+    await bot.channels.get(process.env.streamDiscord).fetchMessage(messageId).then(message => message.delete());
 }
 
 async function updateHertsGGInfo(streamer, hertsgg, collection, message) {
@@ -383,7 +383,7 @@ async function checkStreamTeamOnHertsgg(items, hertsgg, status, collection) {
     for (var streamers = 0; streamers < items.length; streamers++) {
         streamer = items[streamers]
         if (status.includes("<"+streamer.twitchId+">")) {
-            let message = await bot.channels.get(config.streamDiscord).send(streamer.twitchId + ` has gone live on hertsgg! Check them out here: https://www.twitch.tv/hertsgg`);
+            let message = await bot.channels.get(process.env.streamDiscord).send(streamer.twitchId + ` has gone live on hertsgg! Check them out here: https://www.twitch.tv/hertsgg`);
             await checkResetStreamStreakTime(streamer,collection)
             await updateChannelInfo(streamer, collection, message)
             await updateHertsGGInfo(streamer, hertsgg, collection, message)
@@ -394,7 +394,7 @@ async function checkStreamTeamOnHertsgg(items, hertsgg, status, collection) {
 }
 
 async function setupHertsggStream(hertsgg, collection) {
-    let message = await bot.channels.get(config.streamDiscord).send(`We just went live! Check us out here: https://www.twitch.tv/hertsgg`);
+    let message = await bot.channels.get(process.env.streamDiscord).send(`We just went live! Check us out here: https://www.twitch.tv/hertsgg`);
     await checkResetStreamStreakTime(hertsgg, collection)
     await updateChannelInfo(hertsgg, collection, message)
 }
@@ -451,7 +451,7 @@ async function checkHertsggLive(items, collection) {
     });
 }
 
-async function checkStreamTeamLive() {
+async function checkStreamTeamLive(items, collection) {
     items.forEach(item => {
         twitch.streams.channel({ channelID: item.twitchChannelId }, async (err, res) => {
             if(err) {
@@ -459,7 +459,7 @@ async function checkStreamTeamLive() {
             } else {
                 if (goneLive(res.stream, item.streamingNow) && !isHertsgg(item.twitchChannelId)) {// && item.twitchChannelId !== '450976217') {
                     streamer = item    
-                    let message = await bot.channels.get(config.streamDiscord).send(`${item.twitchId} has gone live! Check them out here: https://www.twitch.tv/${item.twitchId}`);
+                    let message = await bot.channels.get(process.env.streamDiscord).send(`${item.twitchId} has gone live! Check them out here: https://www.twitch.tv/${item.twitchId}`);
                     await checkResetStreamStreakTime(streamer,collection)
                     await updateChannelInfo(streamer, collection, message)
                 } else if (finishedStreaming(res.stream, item.streamingNow) && !isHertsgg(item.twitchChannelId)) {
@@ -477,7 +477,7 @@ async function checkStreamTeamLive() {
 * for connecting to our MongoDB database to track our streamer statistics.
 */
 async function pollLive() {
-    await MongoClient.connect(config.mongoAddress, {useNewUrlParser: true}, (err, client) => {
+    await MongoClient.connect(process.env.mongoAddress, {useNewUrlParser: true}, (err, client) => {
         setInterval (async function () {
             const db = client.db("hertsgg");
             const collection = db.collection("twitch-stats");
@@ -489,5 +489,5 @@ async function pollLive() {
     });
 }
 
-bot.login(config.token);
+bot.login(process.env.token);
 pollLive();
