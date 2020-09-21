@@ -356,11 +356,11 @@ async function checkResetStreamStreakTime(streamer,collection) {
     }
 }
 
-async function updateChannelInfo(streamer, collection, message) {
+async function updateChannelStatus(streamer, collection, message) {
     await collection.updateMany({twitchId: streamer.twitchId}, {'$set': {'streamingNow': true, 'recentStreamStart': moment().format(), 'streamMessage': message.id}});
 }
 
-async function updateChannelInfoHosted(streamer, collection, message) {
+async function updateChannelStatusHosted(streamer, collection, message) {
     await collection.updateMany({twitchId: streamer.twitchId}, {'$set': {'recentStreamStart': moment().format(), 'streamMessage': message.id}});
 }
 
@@ -389,7 +389,7 @@ async function checkStreamTeamOnHertsgg(items, hertsgg, status, collection) {
         if (status.includes("<"+streamer.twitchId+">")) {
             let message = await bot.channels.get(process.env.streamDiscord).send(streamer.twitchId + ` has gone live on hertsgg! Check them out here: https://www.twitch.tv/hertsgg`);
             await checkResetStreamStreakTime(streamer,collection)
-            await updateChannelInfoHosted(streamer, collection, message)
+            await updateChannelStatusHosted(streamer, collection, message)
             await updateHertsGGInfo(streamer, hertsgg, collection, message)
             return true
         }
@@ -400,7 +400,7 @@ async function checkStreamTeamOnHertsgg(items, hertsgg, status, collection) {
 async function setupHertsggStream(hertsgg, collection) {
     let message = await bot.channels.get(process.env.streamDiscord).send(`We just went live! Check us out here: https://www.twitch.tv/hertsgg`);
     await checkResetStreamStreakTime(hertsgg, collection)
-    await updateChannelInfo(hertsgg, collection, message)
+    await updateChannelStatus(hertsgg, collection, message)
 }
 
 async function updateHostedChannelStatsPostStream(hertsgg, collection) {
@@ -465,11 +465,12 @@ async function checkStreamTeamLive(items, collection) {
                 if (goneLive(res.stream, streamer.streamingNow) && !isHertsgg(streamer.twitchChannelId)) {
                     let message = await bot.channels.get(process.env.streamDiscord).send(`${streamer.twitchId} has gone live! Check them out here: https://www.twitch.tv/${streamer.twitchId}`);
                     await checkResetStreamStreakTime(streamer,collection)
-                    await updateChannelInfo(streamer, collection, message)
+                    await updateChannelStatus(streamer, collection, message)
                 } else if (finishedStreaming(res.stream, streamer.streamingNow) && !isHertsgg(streamer.twitchChannelId)) {
                     var durationOfStream = Math.floor(moment.duration(moment(moment().format()).diff(moment(streamer.recentStreamStart))).asHours());
                     await deleteStreamAlert(streamer)
                     await updateChannelStatsPostStream(streamer, collection, durationOfStream)
+                    await updateStreamerStatusPostStream(streamer, collection)
                 }
             }
         });
