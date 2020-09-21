@@ -407,6 +407,7 @@ async function updateHostedChannelStatsPostStream(hertsgg, collection) {
     await collection.updateMany({twitchId: hertsgg.twitchId}, {'$set': {'streamingNow': false, 'recentStreamEnd': moment().format(), 'hostingNow': null}});
     var durationOfStream = Math.floor(moment.duration(moment(moment().format()).diff(moment(hertsgg.recentStreamStart))).asHours()*3);
     await updateChannelStatsPostStream(hertsgg.hostingNow, collection, durationOfStream)
+    await updateStreamerStatusPostStream(hertsgg.hostingNow, collection)
 }
 
 async function updateStreamerStatusPostStream(item, collection) {
