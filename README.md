@@ -31,6 +31,7 @@ numbers specifically into the .env.
 
 They should be organised like this in your `.env`
 
+```
 token=BLAHBLAHBLAH
 prefix=!
 committeeID=123456
@@ -38,6 +39,7 @@ serverID=123456
 mongoAddress=BLAHBLAHurlBLAH
 streamDiscord=123456
 twitchClientId=123456
+```
 
 
 ## Setting up node/dependencies for the bot
