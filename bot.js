@@ -457,20 +457,19 @@ async function checkHertsggLive(items, collection) {
 }
 
 async function checkStreamTeamLive(items, collection) {
-    items.forEach(item => {
-        twitch.streams.channel({ channelID: item.twitchChannelId }, async (err, res) => {
+    items.forEach(streamer => {
+        twitch.streams.channel({ channelID: streamer.twitchChannelId }, async (err, res) => {
             if(err) {
                 console.log(err);
             } else {
-                if (goneLive(res.stream, item.streamingNow) && !isHertsgg(item.twitchChannelId)) {// && item.twitchChannelId !== '450976217') {
-                    streamer = item    
-                    let message = await bot.channels.get(process.env.streamDiscord).send(`${item.twitchId} has gone live! Check them out here: https://www.twitch.tv/${item.twitchId}`);
+                if (goneLive(res.stream, streamer.streamingNow) && !isHertsgg(streamer.twitchChannelId)) {
+                    let message = await bot.channels.get(process.env.streamDiscord).send(`${streamer.twitchId} has gone live! Check them out here: https://www.twitch.tv/${streamer.twitchId}`);
                     await checkResetStreamStreakTime(streamer,collection)
                     await updateChannelInfo(streamer, collection, message)
-                } else if (finishedStreaming(res.stream, item.streamingNow) && !isHertsgg(item.twitchChannelId)) {
-                    var durationOfStream = Math.floor(moment.duration(moment(moment().format()).diff(moment(item.recentStreamStart))).asHours());
-                    await updateChannelStatsPostStream(streamer, collection, durationOfStream)
+                } else if (finishedStreaming(res.stream, streamer.streamingNow) && !isHertsgg(streamer.twitchChannelId)) {
+                    var durationOfStream = Math.floor(moment.duration(moment(moment().format()).diff(moment(streamer.recentStreamStart))).asHours());
                     await deleteStreamAlert(streamer)
+                    await updateChannelStatsPostStream(streamer, collection, durationOfStream)
                 }
             }
         });
